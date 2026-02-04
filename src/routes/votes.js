@@ -22,19 +22,27 @@ const fun = {
     "Nope, that person is off the love grid 📡"
   ],
   duplicateIp: [
-    "One vote and the love bouncer says no 🚫",
-    "Duplicate detected because Cupid saw that coming 👀",
-    "Nice try, this IP already sent its rose 🌹"
+    "Ninakk kalaparamayittulla kazhiv undoo, ninne nalalu ariyumoo... 👀",
+    "Dont try play fool with me Nikesh....",
+    "Velachil edukkaruth kettooo...",
+    "Oh god, You againnnn, veendum ningalooo!!!!",
+    "Koutham lesham kooduthala, maappakkanam!!",
+    "Ninne kandappo thanne enikk manassilayii, nee verum koothara alla looka koothara aanenn"
   ],
   success: [
-    "Vote recorded and Cupid updated his spreadsheet 📈",
-    "Success, your vote landed in the love inbox 📬",
-    "Recorded, Cupid stamped it with a heart seal 💘"
+    "Ijj sundari allenn aaraa paranje... ❤️",
+    "Ninnekkondonnum koottiya koodilla, nalla prayandalloo, valla panikkum podoo",
+    "Enikkum ishtamaan, kalyanam kazhikkan thayyarumaan, appo enthaann vechaa..! 💍",
+    "Parasparam onn cheranulla oravasaravum nammal pazhakkaruth",
+    "Nokki irunnoo, ippo kittum...!",
+    "Kuttyy onn manass vechaa, ee kalavara namukkoru maniyarayakkam 💘",
+    "Ente nenjaake neeyalle....",
+    "Porunnoo ente koode",
   ],
   adminMissing: [
-    "Admin password missing and Cupid forgot the safe combo 🧠",
-    "No admin password set and Cupid is facepalming 🤦",
-    "Admin lock is on but the key is missing 🔐"
+    "Pha paranari nee aaroodaan evide ninnaan kalikkunnathenn orma venom? 🤨",
+    "Ezheech podooo",
+    "Thurakkilla makaneeee"
   ],
   adminUnauthorized: [
     "Nope, the love vault stays locked 🔒",
