@@ -1,0 +1,140 @@
+import express from "express";
+import mongoose from "mongoose";
+import Employee from "../models/Employee.js";
+import Vote from "../models/Vote.js";
+
+const router = express.Router();
+
+const fun = {
+  needValentine: [
+    "Pick a valentine—Cupid refuses empty forms 😎",
+    "No selection and Cupid is tapping his tiny foot 👣",
+    "Choose someone before the chocolates melt 🍫"
+  ],
+  invalidId: [
+    "That valentine ID looks fake and Cupid is unimpressed 🕵️",
+    "Invalid ID because Cupid now has trust issues 🫥",
+    "Nice try, that ID is not in the love database 📇"
+  ],
+  notFound: [
+    "That valentine vanished into the mist, try again 🌫️",
+    "Employee not found and Cupid checked twice 🔍",
+    "Nope, that person is off the love grid 📡"
+  ],
+  duplicateIp: [
+    "One vote and the love bouncer says no 🚫",
+    "Duplicate detected because Cupid saw that coming 👀",
+    "Nice try, this IP already sent its rose 🌹"
+  ],
+  success: [
+    "Vote recorded and Cupid updated his spreadsheet 📈",
+    "Success, your vote landed in the love inbox 📬",
+    "Recorded, Cupid stamped it with a heart seal 💘"
+  ],
+  adminMissing: [
+    "Admin password missing and Cupid forgot the safe combo 🧠",
+    "No admin password set and Cupid is facepalming 🤦",
+    "Admin lock is on but the key is missing 🔐"
+  ],
+  adminUnauthorized: [
+    "Nope, the love vault stays locked 🔒",
+    "Access denied because Cupid activated the glitter alarm ✨",
+    "Wrong password and Cupid shook his head 🙄"
+  ]
+};
+
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length > 0) {
+    return forwarded.split(",")[0].trim();
+  }
+  return req.ip || "unknown";
+}
+
+router.post("/", async (req, res, next) => {
+  try {
+    const { valentineId } = req.body || {};
+
+    if (!valentineId) {
+      return res.status(400).json({ error: pick(fun.needValentine) });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(valentineId)) {
+      return res.status(400).json({ error: pick(fun.invalidId) });
+    }
+
+    const valentine = await Employee.findOne({ _id: valentineId, active: true });
+    if (!valentine) {
+      return res.status(404).json({ error: pick(fun.notFound) });
+    }
+
+    const clientIp = getClientIp(req);
+    const ipVote = await Vote.findOne({ voterIp: clientIp });
+    if (ipVote) {
+      return res.status(403).json({ error: pick(fun.duplicateIp) });
+    }
+
+    const vote = await Vote.create({
+      valentineId,
+      voterIp: clientIp
+    });
+
+    res.status(201).json({
+      ok: true,
+      id: vote._id,
+      message: pick(fun.success)
+    });
+  } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(403).json({ error: pick(fun.duplicateIp) });
+    }
+    next(err);
+  }
+});
+
+router.get("/results", async (req, res, next) => {
+  try {
+    const adminPassword = process.env.ADMIN_PASSWORD || "";
+    if (!adminPassword) {
+      return res.status(500).json({ error: pick(fun.adminMissing) });
+    }
+    const provided = req.headers["x-admin-password"];
+    if (!provided || provided !== adminPassword) {
+      return res.status(401).json({ error: pick(fun.adminUnauthorized) });
+    }
+
+    const [totalVotes, results] = await Promise.all([
+      Vote.countDocuments(),
+      Vote.aggregate([
+        { $group: { _id: "$valentineId", count: { $sum: 1 } } },
+        {
+          $lookup: {
+            from: "employees",
+            localField: "_id",
+            foreignField: "_id",
+            as: "employee"
+          }
+        },
+        { $unwind: "$employee" },
+        {
+          $project: {
+            _id: 0,
+            valentineId: "$_id",
+            name: "$employee.name",
+            department: "$employee.department",
+            count: 1
+          }
+        },
+        { $sort: { count: -1, name: 1 } }
+      ])
+    ]);
+
+    res.json({ totalVotes, results });
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default router;
