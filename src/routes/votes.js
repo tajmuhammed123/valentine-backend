@@ -109,11 +109,11 @@ router.post("/", async (req, res, next) => {
       });
     }
 
-    const clientIp = getClientIp(req);
+    // const clientIp = getClientIp(req);
 
     const vote = await Vote.create({
       valentineId,
-      voterIp: clientIp,
+      // voterIp: clientIp,
       deviceId: deviceId,
     });
 

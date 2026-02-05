@@ -8,11 +8,11 @@ const VoteSchema = new mongoose.Schema(
       required: true,
     },
 
-    voterIp: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    // voterIp: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    // },
 
     deviceId: {
       type: String,
