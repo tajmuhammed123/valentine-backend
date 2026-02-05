@@ -89,17 +89,25 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({ error: pick(fun.invalidId) });
     }
 
-    const valentine = await Employee.findOne({ _id: valentineId, active: true });
+    const valentine = await Employee.findOne({
+      _id: valentineId,
+      active: true,
+    });
+
     if (!valentine) {
       return res.status(404).json({ error: pick(fun.notFound) });
     }
 
     const deviceId = req.headers["x-device-id"];
-    if (!deviceId) {
+
+    if (!deviceId || typeof deviceId !== "string") {
       return res.status(400).json({ error: pick(fun.missingDevice) });
     }
 
+    console.log("Incoming deviceId:", deviceId);
+
     const existing = await Vote.findOne({ deviceId });
+
     if (existing) {
       return res.status(403).json({ error: pick(fun.duplicateDevice) });
     }
@@ -108,19 +116,30 @@ router.post("/", async (req, res, next) => {
 
     const vote = await Vote.create({
       valentineId,
-      voterIp: clientIp,
-      deviceId
+      voterIp: clientIp, 
+      deviceId,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       ok: true,
       id: vote._id,
-      message: pick(fun.success)
+      message: pick(fun.success),
     });
   } catch (err) {
     if (err?.code === 11000) {
-      return res.status(403).json({ error: pick(fun.duplicateDevice) });
+      console.log("Duplicate key error field:", err.keyPattern);
+
+      if (err.keyPattern?.deviceId) {
+        return res.status(403).json({
+          error: pick(fun.duplicateDevice),
+        });
+      }
+
+      return res.status(500).json({
+        error: "Database unique index issue. Check DB indexes.",
+      });
     }
+
     next(err);
   }
 });
@@ -145,8 +164,8 @@ router.get("/results", async (req, res, next) => {
             from: "employees",
             localField: "_id",
             foreignField: "_id",
-            as: "employee"
-          }
+            as: "employee",
+          },
         },
         { $unwind: "$employee" },
         {
@@ -155,11 +174,11 @@ router.get("/results", async (req, res, next) => {
             valentineId: "$_id",
             name: "$employee.name",
             department: "$employee.department",
-            count: 1
-          }
+            count: 1,
+          },
         },
-        { $sort: { count: -1, name: 1 } }
-      ])
+        { $sort: { count: -1, name: 1 } },
+      ]),
     ]);
 
     res.json({ totalVotes, results });
