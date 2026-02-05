@@ -7,28 +7,32 @@ const router = express.Router();
 
 const fun = {
   needValentine: [
-    "Pick a valentine—Cupid refuses empty forms 😎",
-    "No selection and Cupid is tapping his tiny foot 👣",
-    "Choose someone before the chocolates melt 🍫"
+    "Oru try... Eni athava biriyani Kittiyalooo",
+    "Kittiyal Ooty illenki Chattii",
+    "Ingane okke nadanna mathiyooo",
   ],
+
   invalidId: [
     "That valentine ID looks fake and Cupid is unimpressed 🕵️",
     "Invalid ID because Cupid now has trust issues 🫥",
-    "Nice try, that ID is not in the love database 📇"
+    "Nice try, that ID is not in the love database 📇",
   ],
+
   notFound: [
     "That valentine vanished into the mist, try again 🌫️",
     "Employee not found and Cupid checked twice 🔍",
-    "Nope, that person is off the love grid 📡"
+    "Nope, that person is off the love grid 📡",
   ],
+
   duplicateIp: [
     "Ninakk kalaparamayittulla kazhiv undoo, ninne nalalu ariyumoo... 👀",
     "Dont try play fool with me Nikesh....",
     "Velachil edukkaruth kettooo...",
     "Oh god, You againnnn, veendum ningalooo!!!!",
     "Koutham lesham kooduthala, maappakkanam!!",
-    "Ninne kandappo thanne enikk manassilayii, nee verum koothara alla looka koothara aanenn"
+    "Ninne kandappo thanne enikk manassilayii, nee verum koothara alla looka koothara aanenn",
   ],
+
   success: [
     "Ijj sundari allenn aaraa paranje... ❤️",
     "Ninnekkondonnum koottiya koodilla, nalla prayandalloo, valla panikkum podoo",
@@ -39,16 +43,18 @@ const fun = {
     "Ente nenjaake neeyalle....",
     "Porunnoo ente koode",
   ],
+
   adminMissing: [
     "Pha paranari nee aaroodaan evide ninnaan kalikkunnathenn orma venom? 🤨",
     "Ezheech podooo",
-    "Thurakkilla makaneeee"
+    "Thurakkilla makaneeee",
   ],
+
   adminUnauthorized: [
-    "Nope, the love vault stays locked 🔒",
-    "Access denied because Cupid activated the glitter alarm ✨",
-    "Wrong password and Cupid shook his head 🙄"
-  ]
+    "Pha paranari nee aaroodaan evide ninnaan kalikkunnathenn orma venom? 🤨",
+    "Ezheech podooo",
+    "Thurakkilla makaneeee",
+  ],
 };
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
