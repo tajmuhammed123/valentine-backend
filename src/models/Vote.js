@@ -8,19 +8,16 @@ const VoteSchema = new mongoose.Schema(
       required: true,
     },
 
-    // voterIp: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
-
     deviceId: {
       type: String,
       trim: true,
-      default: null,
+      required: true,
+      unique: true,
     },
   },
   { timestamps: true }
 );
+
+VoteSchema.index({ deviceId: 1 }, { unique: true });
 
 export default mongoose.model("Vote", VoteSchema);

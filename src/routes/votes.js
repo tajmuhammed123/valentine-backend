@@ -92,20 +92,19 @@ router.post("/", async (req, res, next) => {
       return res.status(404).json({ error: pick(fun.notFound) });
     }
 
-    // Get device ID from headers
-    const deviceId = req.headers["x-device-id"];
-    
-    // Check if device ID is provided
-    if (!deviceId) {
+    const rawDeviceId = req.headers["x-device-id"];
+    const deviceId = Array.isArray(rawDeviceId) ? rawDeviceId[0] : rawDeviceId;
+    const cleanDeviceId = typeof deviceId === "string" ? deviceId.trim() : "";
+
+    if (!cleanDeviceId) {
       return res.status(400).json({ error: pick(fun.missingDevice) });
     }
 
-    // Check if this device has already voted
-    const existing = await Vote.findOne({ deviceId: deviceId });
+    const existing = await Vote.findOne({ deviceId: cleanDeviceId });
     
     if (existing) {
       return res.status(403).json({
-        error: pick(fun.duplicateIp), // Using the same error messages as requested
+        error: pick(fun.duplicateDevice),
       });
     }
 
@@ -114,7 +113,7 @@ router.post("/", async (req, res, next) => {
     const vote = await Vote.create({
       valentineId,
       // voterIp: clientIp,
-      deviceId: deviceId,
+      deviceId: cleanDeviceId,
     });
 
     res.status(201).json({
@@ -123,6 +122,9 @@ router.post("/", async (req, res, next) => {
       message: pick(fun.success),
     });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(403).json({ error: pick(fun.duplicateDevice) });
+    }
     next(err);
   }
 });
