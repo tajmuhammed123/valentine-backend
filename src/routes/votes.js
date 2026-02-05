@@ -98,48 +98,28 @@ router.post("/", async (req, res, next) => {
       return res.status(404).json({ error: pick(fun.notFound) });
     }
 
-    const deviceId = req.headers["x-device-id"];
+    const clientIp = getClientIp(req);
 
-    if (!deviceId || typeof deviceId !== "string") {
-      return res.status(400).json({ error: pick(fun.missingDevice) });
-    }
-
-    console.log("Incoming deviceId:", deviceId);
-
-    const existing = await Vote.findOne({ deviceId });
+    const existing = await Vote.findOne({ voterIp: clientIp });
 
     if (existing) {
-      return res.status(403).json({ error: pick(fun.duplicateDevice) });
+      return res.status(403).json({
+        error: pick(fun.duplicateIp),
+      });
     }
-
-    const clientIp = getClientIp(req);
 
     const vote = await Vote.create({
       valentineId,
-      voterIp: clientIp, 
-      deviceId,
+      voterIp: clientIp,
+      deviceId: req.headers["x-device-id"] || null,
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       ok: true,
       id: vote._id,
       message: pick(fun.success),
     });
   } catch (err) {
-    if (err?.code === 11000) {
-      console.log("Duplicate key error field:", err.keyPattern);
-
-      if (err.keyPattern?.deviceId) {
-        return res.status(403).json({
-          error: pick(fun.duplicateDevice),
-        });
-      }
-
-      return res.status(500).json({
-        error: "Database unique index issue. Check DB indexes.",
-      });
-    }
-
     next(err);
   }
 });

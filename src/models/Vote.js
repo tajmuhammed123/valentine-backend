@@ -6,22 +6,18 @@ const VoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
       required: true,
-      index: true,
     },
 
     voterIp: {
       type: String,
+      required: true,
       trim: true,
-      default: null,
     },
 
     deviceId: {
       type: String,
       trim: true,
-      required: true,
-      unique: true,
-      immutable: true,
-      index: true,
+      default: null,
     },
   },
   { timestamps: true }
