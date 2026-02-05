@@ -11,19 +11,16 @@ const fun = {
     "Kittiyal Ooty illenki Chattii",
     "Ingane okke nadanna mathiyooo",
   ],
-
   invalidId: [
     "That valentine ID looks fake and Cupid is unimpressed 🕵️",
     "Invalid ID because Cupid now has trust issues 🫥",
     "Nice try, that ID is not in the love database 📇",
   ],
-
   notFound: [
     "That valentine vanished into the mist, try again 🌫️",
     "Employee not found and Cupid checked twice 🔍",
     "Nope, that person is off the love grid 📡",
   ],
-
   duplicateIp: [
     "Ninakk kalaparamayittulla kazhiv undoo, ninne nalalu ariyumoo... 👀",
     "Dont try play fool with me Nikesh....",
@@ -42,7 +39,6 @@ const fun = {
     "Same device veendum? Cupid note eduthu 📝",
     "Ith device already vote cheythu, pooyi 👀",
   ],
-
   success: [
     "Ijj sundari allenn aaraa paranje... ❤️",
     "Ninnekkondonnum koottiya koodilla, nalla prayandalloo, valla panikkum podoo",
@@ -53,13 +49,11 @@ const fun = {
     "Ente nenjaake neeyalle....",
     "Porunnoo ente koode",
   ],
-
   adminMissing: [
     "Pha paranari nee aaroodaan evide ninnaan kalikkunnathenn orma venom? 🤨",
     "Ezheech podooo",
     "Thurakkilla makaneeee",
   ],
-
   adminUnauthorized: [
     "Pha paranari nee aaroodaan evide ninnaan kalikkunnathenn orma venom? 🤨",
     "Ezheech podooo",
@@ -98,20 +92,29 @@ router.post("/", async (req, res, next) => {
       return res.status(404).json({ error: pick(fun.notFound) });
     }
 
-    const clientIp = getClientIp(req);
+    // Get device ID from headers
+    const deviceId = req.headers["x-device-id"];
+    
+    // Check if device ID is provided
+    if (!deviceId) {
+      return res.status(400).json({ error: pick(fun.missingDevice) });
+    }
 
-    const existing = await Vote.findOne({ voterIp: clientIp });
-
+    // Check if this device has already voted
+    const existing = await Vote.findOne({ deviceId: deviceId });
+    
     if (existing) {
       return res.status(403).json({
-        error: pick(fun.duplicateIp),
+        error: pick(fun.duplicateIp), // Using the same error messages as requested
       });
     }
+
+    const clientIp = getClientIp(req);
 
     const vote = await Vote.create({
       valentineId,
       voterIp: clientIp,
-      deviceId: req.headers["x-device-id"] || null,
+      deviceId: deviceId,
     });
 
     res.status(201).json({
@@ -127,10 +130,13 @@ router.post("/", async (req, res, next) => {
 router.get("/results", async (req, res, next) => {
   try {
     const adminPassword = process.env.ADMIN_PASSWORD || "";
+
     if (!adminPassword) {
       return res.status(500).json({ error: pick(fun.adminMissing) });
     }
+
     const provided = req.headers["x-admin-password"];
+
     if (!provided || provided !== adminPassword) {
       return res.status(401).json({ error: pick(fun.adminUnauthorized) });
     }
