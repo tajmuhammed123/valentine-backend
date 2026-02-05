@@ -32,6 +32,16 @@ const fun = {
     "Koutham lesham kooduthala, maappakkanam!!",
     "Ninne kandappo thanne enikk manassilayii, nee verum koothara alla looka koothara aanenn",
   ],
+  missingDevice: [
+    "Device ID illa, Cupid silent modeil poyi 📱",
+    "Device ID vendaathath kond vote illa, sorry 😎",
+    "ID kaanilla, Cupid thirichu poyi 🧾",
+  ],
+  duplicateDevice: [
+    "Nice try 😎 Cupid is watching!",
+    "Same device veendum? Cupid note eduthu 📝",
+    "Ith device already vote cheythu, pooyi 👀",
+  ],
 
   success: [
     "Ijj sundari allenn aaraa paranje... ❤️",
@@ -84,15 +94,22 @@ router.post("/", async (req, res, next) => {
       return res.status(404).json({ error: pick(fun.notFound) });
     }
 
-    const clientIp = getClientIp(req);
-    const ipVote = await Vote.findOne({ voterIp: clientIp });
-    if (ipVote) {
-      return res.status(403).json({ error: pick(fun.duplicateIp) });
+    const deviceId = req.headers["x-device-id"];
+    if (!deviceId) {
+      return res.status(400).json({ error: pick(fun.missingDevice) });
     }
+
+    const existing = await Vote.findOne({ deviceId });
+    if (existing) {
+      return res.status(403).json({ error: pick(fun.duplicateDevice) });
+    }
+
+    const clientIp = getClientIp(req);
 
     const vote = await Vote.create({
       valentineId,
-      voterIp: clientIp
+      voterIp: clientIp,
+      deviceId
     });
 
     res.status(201).json({
@@ -102,7 +119,7 @@ router.post("/", async (req, res, next) => {
     });
   } catch (err) {
     if (err?.code === 11000) {
-      return res.status(403).json({ error: pick(fun.duplicateIp) });
+      return res.status(403).json({ error: pick(fun.duplicateDevice) });
     }
     next(err);
   }
